@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Everglow - The Magic Alchemist</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <!-- Load Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <style>
+        /* Define Theme Colors: Playful Magic (Deep Blue/Violet, Vibrant Pink/Teal) */
+        :root {
+            --midnight-blue: #0A0A2A; 
+            --primary-glow: #89CFF0; /* Muted Cyan/Teal for secondary glow/accents */
+            --accent-pink: #FF69B4; /* Hot Pink for main buttons/action */
+            --text-light: #E0E0FF;
+            --card-border: rgba(255, 105, 180, 0.4); /* Pink border */
+            --shadow-deep: rgba(0, 0, 0, 0.8);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--midnight-blue);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+            background-image: radial-gradient(circle at center, rgba(10, 10, 42, 0) 10%, rgba(10, 10, 42, 0.9) 100%);
+        }
+
+        /* --- PLAYFUL GLOW EFFECTS --- */
+        .glowing-title {
+            color: var(--primary-glow);
+            text-shadow: 0 0 5px rgba(137, 207, 240, 0.5), 0 0 10px rgba(137, 207, 240, 0.2);
+        }
+
+        .floating-card {
+            background-color: rgba(30, 30, 50, 0.5); 
+            border: 1px solid var(--card-border); 
+            box-shadow: 0 12px 30px var(--shadow-deep), 
+                        0 0 10px rgba(255, 105, 180, 0.8); /* Stronger pink glow */
+            backdrop-filter: blur(10px); 
+            transition: all 0.3s ease;
+        }
+        .floating-card:hover {
+            box-shadow: 0 12px 35px var(--shadow-deep), 
+                        0 0 15px rgba(255, 105, 180, 1.0);
+        }
+
+        /* --- MAGIC PARTICLE ANIMATION (Vibrant Pink) --- */
+        @keyframes stardust-burst {
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; }
+        }
+
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            background-color: var(--accent-pink);
+            box-shadow: 0 0 4px var(--accent-pink);
+            animation: stardust-burst 1.2s ease-out forwards; 
+            pointer-events: none; 
+            z-index: 50; 
+        }
+
+        .textarea-input {
+            background-color: rgba(0, 0, 0, 0.3);
+            color: var(--text-light);
+            border: 1px solid var(--accent-pink); /* Pink border */
+            resize: none;
+            transition: all 0.3s;
+        }
+        .textarea-input:focus {
+            outline: none;
+            border-color: var(--primary-glow);
+            box-shadow: 0 0 8px rgba(137, 207, 240, 0.6);
+        }
+        
+        #original-panel-container {
+            display: none; 
+        }
+
+        /* Button Styling Refinement */
+        .btn-primary {
+            background-color: var(--accent-pink);
+            color: var(--midnight-blue);
+            font-weight: 800; /* Extra bold */
+            box-shadow: 0 0 15px rgba(255, 105, 180, 0.8);
+        }
+        .btn-accent {
+            background-color: var(--primary-glow);
+            color: var(--midnight-blue);
+            box-shadow: 0 0 8px rgba(137, 207, 240, 0.6);
+        }
+    </style>
+</head>
+<body class="selection:bg-pink-500 selection:text-white">
+
+    <div class="w-full max-w-lg mx-auto space-y-8">
+        
+        <!-- Header -->
+        <header class="text-center">
+            <h1 class="glowing-title text-5xl font-extrabold mb-2">Everglow</h1>
+            <h2 class="text-xl text-text-light/70 font-medium tracking-widest">THE MAGIC ALCHEMIST</h2>
+        </header>
+
+        <!-- The Prompt Alchemist Card -->
+        <div class="floating-card p-6 md:p-8 rounded-2xl text-center text-text-light space-y-6">
+            
+            <!-- Card Title -->
+            <div class="text-3xl font-extrabold tracking-wider" style="color: var(--accent-pink);">
+                The Magic Alchemist
+            </div>
+            
+            <p class="text-text-light/90 text-md">
+                Whisper your **Spell**, or upload an image to refine its essence.
+            </p>
+            
+            <!-- 1. Upload Button (TEXT FIXED HERE) -->
+            <div class="w-full pt-4 pb-2">
+                <button id="upload-button" class="w-full max-w-sm mx-auto flex items-center justify-center font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] btn-accent">
+                    <i class="ph ph-upload-simple text-xl mr-2"></i> Upload Image
+                </button>
+            </div>
+
+            <!-- Native File Input (Always Hidden) -->
+            <input type="file" id="image-input" accept="image/*" class="hidden">
+            
+            <!-- 2. Status Display (Separated) -->
+            <div id="input-status" class="text-sm text-text-light/70 w-full overflow-hidden text-ellipsis whitespace-nowrap pt-2">
+                Status: Ready to Cast Spell.
+            </div>
+
+            <!-- 3. Prompt Input (Full Width Block) -->
+            <textarea id="prompt-input" rows="4" placeholder="e.g., A wizard cat wearing a golden monocle, digital art, or 'Change the background to a rainy Neo-Tokyo street.'" 
+                      class="textarea-input w-full p-4 rounded-xl text-left font-mono text-sm"></textarea>
+
+            <!-- Image Comparison Area -->
+            <div class="py-4 flex flex-col sm:flex-row justify-center gap-4">
+                
+                <!-- Original Image Panel (Input) - Initially hidden -->
+                <div class="flex-1 min-h-[16rem] space-y-2" id="original-panel-container">
+                    <div class="text-sm font-semibold text-text-light/70" id="original-label">Source Magic</div>
+                    <img id="original-image-preview" class="hidden w-full h-full object-contain rounded-lg floating-card p-1 max-h-96 mx-auto" src="#" alt="Original Uploaded Image">
+                    <div id="original-image-placeholder" class="text-center text-text-light/50 pt-16 hidden">
+                        Source will display here.
+                    </div>
+                </div>
+
+                <!-- Result Image Panel (Output) -->
+                <div class="flex-1 min-h-[16rem] space-y-2">
+                    <div class="text-sm font-semibold text-text-light/70" id="result-label">Enchanted Result</div>
+                    <img id="result-image-preview" class="hidden w-full h-full object-contain rounded-lg floating-card p-1 max-h-96 mx-auto" src="#" alt="Generated Image">
+                    <div id="result-image-placeholder" class="text-center text-text-light/50 pt-16">
+                        Output will appear here.
+                    </div>
+                </div>
+
+            </div>
+            <!-- End Image Comparison Area -->
+
+            <div id="result-actions" class="hidden flex justify-center gap-4 pt-4">
+                <button id="download-button" class="flex items-center font-semibold py-2 px-4 rounded-xl transition-all duration-300 hover:scale-[1.05] btn-primary">
+                    <i class="ph ph-download-simple text-lg mr-2"></i> Download Enchantment
+                </button>
+            </div>
+
+            <div class="h-16 flex flex-col items-center justify-center">
+                <!-- Amulet Spin/Loading State -->
+                <div id="loading-amulet" class="hidden w-10 h-10 border-4 border-accent-pink border-t-transparent rounded-full animate-spin"></div>
+                <!-- Message Box -->
+                <div id="message-box" class="text-sm text-accent-pink hidden mt-2 font-semibold"></div>
+            </div>
+
+            <!-- Main Interaction Button -->
+            <button id="magic-button" class="w-full relative overflow-hidden font-bold py-4 px-6 rounded-xl transition-all duration-300 transform btn-primary hover:scale-[1.01]">
+                <span class="relative z-10">CAST THE ENCHANTMENT!</span>
+            </button>
+            
+            <p class="text-xs text-text-light/50 pt-4">
+                Powered by Everglow Magic.
+            </p>
+        </div>
+        
+    </div>
+
+    <!-- --- MAGIC BOOST MODAL --- -->
+    <div id="beautify-modal-backdrop" class="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-md hidden z-[100] flex items-center justify-center p-4">
+        <div id="beautify-modal" class="floating-card p-6 rounded-xl w-full max-w-sm text-center space-y-4 border-2" 
+             style="background-color: #1a1a3a; border-color: var(--accent-pink);">
+            
+            <i class="ph ph-sparkle text-5xl" style="color: var(--accent-pink);"></i>
+            <h3 class="text-xl font-bold" style="color: var(--text-light);">Instant Magic Boost!</h3>
+            
+            <p class="text-sm text-text-light/80">
+                Would you like to automatically **Enhance** the uploaded portrait (<span id="modal-filename" class="font-semibold">file.jpg</span>) for a professional, 8K look?
+            </p>
+
+            <div class="flex gap-4 justify-center pt-2">
+                <button id="modal-confirm" class="font-bold py-2 px-4 rounded-lg transition-all duration-200 hover:scale-105 btn-primary">
+                    <i class="ph ph-magic-wand text-lg mr-1"></i> Initiate Magic Boost
+                </button>
+                <button id="modal-decline" class="font-semibold py-2 px-4 rounded-lg transition-all duration-200 hover:scale-105"
+                        style="background-color: rgba(255, 255, 255, 0.1); color: var(--text-light);">
+                    Override Spell
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- --------------------------------------- -->
+
+
+    <script>
+        // --- UI Element References ---
+        const promptInput = document.getElementById('prompt-input');
+        const magicButton = document.getElementById('magic-button');
+        const loadingAmulet = document.getElementById('loading-amulet');
+        const messageBox = document.getElementById('message-box');
+        
+        // Image Preview Elements
+        const originalPanelContainer = document.getElementById('original-panel-container');
+        const originalImagePreview = document.getElementById('original-image-preview');
+        const originalImagePlaceholder = document.getElementById('original-image-placeholder');
+        const resultImagePreview = document.getElementById('result-image-preview');
+        const resultImagePlaceholder = document.getElementById('result-image-placeholder');
+
+        const uploadButton = document.getElementById('upload-button');
+        const imageInput = document.getElementById('image-input');
+        const inputStatus = document.getElementById('input-status');
+        const downloadButton = document.getElementById('download-button');
+        const resultActions = document.getElementById('result-actions');
+        
+        // Modal Elements
+        const beautifyModalBackdrop = document.getElementById('beautify-modal-backdrop');
+        const modalConfirmButton = document.getElementById('modal-confirm');
+        const modalDeclineButton = document.getElementById('modal-decline');
+        const modalFileNameSpan = document.getElementById('modal-filename');
+
+        // --- CONSTANTS & State ---
+        const IMAGE_GENERATION_MODEL = 'gemini-2.5-flash-image-preview';
+        const apiKey = "AIzaSyDdOkFYez625UjfgfOSefxA4JGdmLg_PXQ"; 
+        const BEAUTIFY_PROMPT = "Enhance the photo quality to 8K cinematic detail, brighten the subject's face, smooth skin imperfections naturally, sharpen facial details, and gently improve lighting and saturation for a professional, high-end look. Maintain original composition.";
+        
+        let currentBase64Image = null; 
+        let originalUploadedBase64Image = null;
+
+        // --- Utility Functions ---
+
+        // Function to create and animate the subtle Pink particles (Magic Effect)
+        function animateStardustBurst(sourceElement = magicButton) {
+            const rect = sourceElement.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            const numberOfParticles = 20; 
+
+            for (let i = 0; i < numberOfParticles; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                const angle = Math.random() * 2 * Math.PI;
+                const distance = Math.random() * 100 + 40; 
+
+                const dx = Math.cos(angle) * distance;
+                const dy = Math.sin(angle) * distance;
+
+                particle.style.setProperty('--dx', `${dx}px`);
+                particle.style.setProperty('--dy', `${dy}px`);
+                particle.style.left = `${centerX - 1.5}px`;
+                particle.style.top = `${centerY - 1.5}px`;
+
+                document.body.appendChild(particle);
+
+                particle.addEventListener('animationend', () => {
+                    particle.remove();
+                });
+            }
+        }
+        
+        function base64UrlToData(base64Url) {
+            if (base64Url && base64Url.includes(',')) {
+                return base64Url.substring(base64Url.indexOf(',') + 1);
+            }
+            return null;
+        }
+
+        function base64UrlToMimeType(base64Url) {
+            if (base64Url && base64Url.includes(':') && base64Url.includes(';')) {
+                return base64Url.substring(base64Url.indexOf(':') + 1, base64Url.indexOf(';'));
+            }
+            return 'image/png'; 
+        }
+
+        // --- Messaging and Loading ---
+
+        function setLoadingState(isLoading, message = "BREWING THE POTION...") {
+            magicButton.disabled = isLoading;
+            promptInput.disabled = isLoading;
+            uploadButton.disabled = isLoading;
+            
+            if (isLoading) {
+                magicButton.innerHTML = `<span class="relative z-10">${message}</span>`;
+                loadingAmulet.classList.remove('hidden');
+                messageBox.classList.add('hidden');
+                resultActions.classList.add('hidden');
+            } else {
+                magicButton.innerHTML = `<span class="relative z-10">CAST THE ENCHANTMENT!</span>`;
+                loadingAmulet.classList.add('hidden');
+            }
+        }
+        
+        function showMessage(text, type = "info") {
+            messageBox.textContent = text;
+            messageBox.classList.remove('hidden');
+            if (type === "error") {
+                messageBox.style.color = '#FF7777'; 
+            } else if (type === "success") {
+                messageBox.style.color = 'var(--primary-glow)';
+                animateStardustBurst(magicButton);
+            } else {
+                messageBox.style.color = 'var(--accent-pink)';
+            }
+        }
+
+        // --- Core API Integration (Exponential Backoff included) ---
+        
+        async function generateImage(userPrompt, inputBase64) {
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${IMAGE_GENERATION_MODEL}:generateContent?key=${apiKey}`;
+            
+            let contentsParts = [{ text: userPrompt }];
+
+            if (inputBase64) {
+                const mimeType = base64UrlToMimeType(inputBase64);
+                const data = base64UrlToData(inputBase64);
+
+                contentsParts.push({
+                    inlineData: {
+                        mimeType: mimeType,
+                        data: data
+                    }
+                });
+            }
+
+            const payload = {
+                contents: [{ parts: contentsParts }],
+                generationConfig: {
+                    responseModalities: ['TEXT', 'IMAGE']
+                }
+            };
+
+            const maxRetries = 3;
+            let currentRetry = 0;
+
+            while (currentRetry < maxRetries) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        const errorBody = await response.json();
+                        if (response.status === 429 && currentRetry < maxRetries - 1) {
+                            throw new Error('Rate limit exceeded. Retrying...');
+                        } else {
+                            throw new Error(`API Request failed: ${response.status} - ${errorBody.error.message}`);
+                        }
+                    }
+
+                    const result = await response.json();
+                    
+                    const imagePart = result?.candidates?.[0]?.content?.parts?.find(p => p.inlineData && p.inlineData.mimeType.startsWith('image/'));
+
+                    if (imagePart) {
+                        const mimeType = imagePart.inlineData.mimeType;
+                        const base64Data = imagePart.inlineData.data;
+                        return `data:${mimeType};base64,${base64Data}`;
+                    } else {
+                        const textPart = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+                        if (textPart) {
+                             throw new Error(textPart);
+                        } else {
+                            throw new Error("Received empty or invalid image data from API.");
+                        }
+                    }
+                } catch (error) {
+                    currentRetry++;
+                    if (currentRetry < maxRetries) {
+                        const delay = Math.pow(2, currentRetry) * 1000;
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                    } else {
+                        throw new Error(`Failed to cast spell after ${maxRetries} attempts: ${error.message}`);
+                    }
+                }
+            }
+        }
+        
+        // --- Application Logic ---
+
+        function resetAppState() {
+            currentBase64Image = null;
+            originalUploadedBase64Image = null;
+            imageInput.value = null; 
+            
+            promptInput.value = '';
+            promptInput.placeholder = "e.g., A wizard cat wearing a golden monocle, digital art, or 'Change the background to a rainy Neo-Tokyo street.'";
+            
+            originalPanelContainer.style.display = 'none'; 
+            originalImagePreview.classList.add('hidden');
+            originalImagePlaceholder.classList.add('hidden');
+            
+            resultImagePreview.classList.add('hidden');
+            resultImagePlaceholder.classList.remove('hidden');
+            
+            resultActions.classList.add('hidden');
+            loadingAmulet.classList.add('hidden');
+            messageBox.classList.add('hidden');
+            
+            inputStatus.textContent = "Status: Ready to Cast Spell.";
+            
+            setLoadingState(false);
+        }
+
+        function showBeautifyModal(fileName) {
+            modalFileNameSpan.textContent = fileName;
+            beautifyModalBackdrop.classList.remove('hidden');
+        }
+
+        function hideBeautifyModal() {
+            beautifyModalBackdrop.classList.add('hidden');
+        }
+
+        function proceedToCustomPrompt(fileName) {
+            hideBeautifyModal();
+            inputStatus.textContent = `Source: ${fileName} | Mode: Refine Spel
