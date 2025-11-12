@@ -207,14 +207,14 @@
 
 
     <script>
+        // --- UI Element References ---
         const promptInput = document.getElementById('prompt-input');
         const magicButton = document.getElementById('magic-button');
         const loadingAmulet = document.getElementById('loading-amulet');
         const messageBox = document.getElementById('message-box');
         
         // Image Preview Elements
-        const originalPanelContainer = document.getElementById('original-panel-container'); // NEW
-        const originalLabel = document.getElementById('original-label'); // NEW
+        const originalPanelContainer = document.getElementById('original-panel-container');
         const originalImagePreview = document.getElementById('original-image-preview');
         const originalImagePlaceholder = document.getElementById('original-image-placeholder');
         const resultImagePreview = document.getElementById('result-image-preview');
@@ -232,14 +232,16 @@
         const modalDeclineButton = document.getElementById('modal-decline');
         const modalFileNameSpan = document.getElementById('modal-filename');
 
-        // CONSTANTS
+        // --- CONSTANTS & State ---
         const IMAGE_GENERATION_MODEL = 'gemini-2.5-flash-image-preview';
-        const apiKey = ""; 
+        const apiKey = ""; // Canvas environment will inject API key
         const BEAUTIFY_PROMPT = "Enhance the photo quality, brighten the subject's face, smooth skin imperfections naturally, sharpen facial details, and gently improve lighting and saturation for a professional, magazine-quality portrait look. Maintain original composition.";
         
         // State variable
-        let currentBase64Image = null; // Holds the last generated image (for next input)
-        let originalUploadedBase64Image = null; // Holds the user's initial upload (to reset)
+        let currentBase64Image = null; // Holds the last generated image (for next input/chaining)
+        let originalUploadedBase64Image = null; // Holds the user's initial upload (to reset/compare)
+
+        // --- Utility Functions ---
 
         // Function to create and animate the ghostly violet particles
         function animateStardustBurst(sourceElement = magicButton) {
@@ -260,8 +262,6 @@
                 const dy = Math.sin(angle) * distance;
 
                 particle.style.setProperty('--dx', `${dx}px`);
-                particle.style.setProperty('--dy', `${dy}px`);
-
                 particle.style.left = `${centerX - 2}px`;
                 particle.style.top = `${centerY - 2}px`;
 
@@ -287,15 +287,46 @@
             }
             return 'image/png'; 
         }
+
+        // --- Messaging and Loading ---
+
+        function setLoadingState(isLoading, message = "Casting the Spell...") {
+            magicButton.disabled = isLoading;
+            promptInput.disabled = isLoading;
+            uploadButton.disabled = isLoading;
+            
+            if (isLoading) {
+                magicButton.innerHTML = `<span class="relative z-10">${message}</span>`;
+                loadingAmulet.classList.remove('hidden');
+                messageBox.classList.add('hidden');
+                resultActions.classList.add('hidden');
+            } else {
+                magicButton.innerHTML = `<span class="relative z-10">Generate Enchanted Image</span>`;
+                loadingAmulet.classList.add('hidden');
+            }
+        }
         
-        // Handles the API call for image generation (multimodal)
+        function showMessage(text, type = "info") {
+            messageBox.textContent = text;
+            messageBox.classList.remove('hidden');
+            if (type === "error") {
+                messageBox.style.color = 'red';
+            } else if (type === "success") {
+                messageBox.style.color = 'var(--arcane-silver)';
+                animateStardustBurst(magicButton);
+            } else {
+                messageBox.style.color = 'var(--ghostly-violet)';
+            }
+        }
+
+        // --- Core API Integration (Exponential Backoff included) ---
+        
         async function generateImage(userPrompt, inputBase64) {
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${IMAGE_GENERATION_MODEL}:generateContent?key=${apiKey}`;
             
             let contentsParts = [{ text: userPrompt }];
 
             if (inputBase64) {
-                // Add the image part for image editing (image-to-image)
                 const mimeType = base64UrlToMimeType(inputBase64);
                 const data = base64UrlToData(inputBase64);
 
@@ -327,7 +358,13 @@
 
                     if (!response.ok) {
                         const errorBody = await response.json();
-                        throw new Error(`API Request failed: ${response.status} - ${errorBody.error.message}`);
+                        if (response.status === 429 && currentRetry < maxRetries - 1) {
+                            // Rate limit, retry
+                            throw new Error('Rate limit exceeded. Retrying...');
+                        } else {
+                            // Non-retryable error or final failure
+                            throw new Error(`API Request failed: ${response.status} - ${errorBody.error.message}`);
+                        }
                     }
 
                     const result = await response.json();
@@ -339,22 +376,53 @@
                         const base64Data = imagePart.inlineData.data;
                         return `data:${mimeType};base64,${base64Data}`;
                     } else {
-                        throw new Error("Received empty or invalid image data from API.");
+                        // Check for text-only error messages from the model
+                        const textPart = result?.candidates?.[0]?.content?.parts?.find(p => p.text);
+                        if (textPart) {
+                             throw new Error(textPart.text);
+                        } else {
+                            throw new Error("Received empty or invalid image data from API.");
+                        }
                     }
                 } catch (error) {
-                    console.error(`Attempt ${currentRetry + 1} failed:`, error);
                     currentRetry++;
                     if (currentRetry < maxRetries) {
-                        // Exponential backoff
+                        // Exponential backoff delay
                         const delay = Math.pow(2, currentRetry) * 1000;
                         await new Promise(resolve => setTimeout(resolve, delay));
                     } else {
-                        throw new Error(`Failed to generate image after ${maxRetries} attempts.`);
+                        throw new Error(`Failed to generate image after ${maxRetries} attempts: ${error.message}`);
                     }
                 }
             }
         }
         
+        // --- Application Logic ---
+
+        function resetAppState() {
+            currentBase64Image = null;
+            originalUploadedBase64Image = null;
+            imageInput.value = null; // Clear file input
+            
+            promptInput.value = '';
+            promptInput.placeholder = "e.g., A wizard cat wearing a golden monocle, digital art, or 'Change the cat's monocle to sapphire.'";
+            
+            originalPanelContainer.style.display = 'none'; 
+            originalImagePreview.classList.add('hidden');
+            originalImagePlaceholder.classList.add('hidden');
+            
+            resultImagePreview.classList.add('hidden');
+            resultImagePlaceholder.classList.remove('hidden');
+            
+            resultActions.classList.add('hidden');
+            loadingAmulet.classList.add('hidden');
+            messageBox.classList.add('hidden');
+            
+            inputStatus.textContent = "Status: Text-to-Image Mode.";
+            
+            setLoadingState(false);
+        }
+
         // --- Modal Control Functions ---
 
         function showBeautifyModal(fileName) {
@@ -370,40 +438,105 @@
             hideBeautifyModal();
             inputStatus.textContent = `Input: ${fileName} | Mode: Edit by Prompt.`;
             promptInput.placeholder = "Describe the changes you want to the uploaded image...";
-            // --- MAGIC EFFECT: Upload Complete ---
             animateStardustBurst(uploadButton);
         }
         
-        // --- Input Handling ---
-        
         function handleImageUpload() {
             const file = imageInput.files[0];
-            if (!file) return;
+            if (!file) {
+                // If user opens the dialog and cancels, reset to text-to-image mode
+                resetAppState(); 
+                return;
+            }
 
             const reader = new FileReader();
             reader.onload = (e) => {
                 const base64Url = e.target.result;
-                originalUploadedBase64Image = base64Url; // Store the initial upload
-                currentBase64Image = base64Url; // Current base for the first spell is the upload
+                originalUploadedBase64Image = base64Url;
+                currentBase64Image = base64Url;
 
-                // 1. Set the ORIGINAL image panel
-                originalPanelContainer.style.display = 'block'; // Make panel visible
+                originalPanelContainer.style.display = 'block';
                 originalImagePreview.src = base64Url;
                 originalImagePreview.classList.remove('hidden');
                 originalImagePlaceholder.classList.add('hidden');
                 
-                // Clear the result area for a fresh edit
                 resultImagePreview.classList.add('hidden');
                 resultImagePlaceholder.classList.remove('hidden');
                 resultActions.classList.add('hidden'); 
 
-                promptInput.value = ''; // Clear prompt input before asking
+                promptInput.value = '';
 
-                // --- Trigger the Beautification Modal ---
                 showBeautifyModal(file.name);
             };
             reader.readAsDataURL(file);
         }
+        
+        async function handleMagicButtonClick() {
+            const userPrompt = promptInput.value.trim();
+            
+            if (!userPrompt && !currentBase64Image) {
+                showMessage("Please describe the image you wish to conjure.", "error");
+                return;
+            }
+
+            if (!userPrompt && currentBase64Image) {
+                showMessage("You must enter a prompt to edit the uploaded image.", "error");
+                return;
+            }
+
+            setLoadingState(true);
+            showMessage("Casting the Spell...", "info");
+
+            try {
+                const resultBase64 = await generateImage(userPrompt, currentBase64Image);
+                
+                // Set the result for potential subsequent edits
+                currentBase64Image = resultBase64; 
+
+                // Update UI
+                resultImagePreview.src = resultBase64;
+                resultImagePreview.classList.remove('hidden');
+                resultImagePlaceholder.classList.add('hidden');
+                
+                resultActions.classList.remove('hidden');
+
+                setLoadingState(false);
+                showMessage("Enchantment Complete! The result is conjured.", "success");
+                
+                const mode = originalUploadedBase64Image ? 'Edit by Result' : 'Text-to-Image Done';
+                inputStatus.textContent = `Status: ${mode} | Ready for next prompt.`;
+                
+                promptInput.value = '';
+
+            } catch (error) {
+                console.error("Conjuring Error:", error);
+                setLoadingState(false);
+                showMessage(`Conjuring Failed: ${error.message}. Try refining your prompt.`, "error");
+            }
+        }
+
+        // --- Download Functionality ---
+        function downloadImage() {
+            const resultImageSrc = resultImagePreview.src;
+            if (resultImageSrc && resultImagePreview.classList.contains('hidden') === false) {
+                const a = document.createElement('a');
+                a.href = resultImageSrc;
+                
+                let filename = 'everglow_result.png';
+                if (originalUploadedBase64Image) {
+                    filename = 'everglow_edited.png';
+                }
+                
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            } else {
+                showMessage("No enchanted image to download!", "error");
+            }
+        }
+        
+        // --- Event Listeners ---
         
         uploadButton.addEventListener('click', () => {
             imageInput.click();
@@ -411,8 +544,6 @@
         
         imageInput.addEventListener('change', handleImageUpload);
         
-        // --- Modal Button Event Handlers ---
-
         modalDeclineButton.addEventListener('click', () => {
             const fileName = imageInput.files[0]?.name || 'Uploaded Image';
             proceedToCustomPrompt(fileName);
@@ -421,14 +552,16 @@
         modalConfirmButton.addEventListener('click', () => {
             hideBeautifyModal();
             promptInput.value = BEAUTIFY_PROMPT;
-            
-            // Set input status immediately, then trigger the generation
             inputStatus.textContent = `Input: Auto-Enhance | Mode: Processing Enchantment...`;
             handleMagicButtonClick();
         });
 
+        magicButton.addEventListener('click', handleMagicButtonClick);
+        downloadButton.addEventListener('click', downloadImage);
 
-        // --- Download Functionality ---
-        
-        function downloadImage() {
-  
+        // Initialize state on load
+        document.addEventListener('DOMContentLoaded', resetAppState);
+    </script>
+</body>
+</html>
+
