@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Everglow - The Prompt Alchemist</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <!-- Load Phosphor Icons for a magical touch -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <style>
+        /* Define Theme Colors (Softer, Cooler Glow) */
+        :root {
+            --midnight-indigo: #0D113C; /* Deep Background */
+            --arcane-silver: #B0E0E6; /* Main Accent/Interaction (Powder Blue) */
+            --ghostly-violet: #DDA0DD; /* Highlight/Glow (Plum/Light Magenta) */
+            --clean-scroll: #F0F0FF;
+            --button-shadow: rgba(176, 224, 230, 0.4);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--midnight-indigo);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+
+        /* --- GLOW EFFECTS (Core of the Magic Theme) --- */
+        .glowing-title {
+            color: var(--arcane-silver);
+            text-shadow: 0 0 8px rgba(176, 224, 230, 0.5), 0 0 15px rgba(176, 224, 230, 0.3);
+        }
+
+        .floating-card {
+            background-color: rgba(240, 240, 255, 0.05);
+            border: 1px solid rgba(176, 224, 230, 0.3); /* Softer border */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 
+                        0 0 10px var(--ghostly-violet); /* Deep shadow + Violet glow */
+            backdrop-filter: blur(5px);
+        }
+
+        /* --- GHOSTLY VIOLET PARTICLE ANIMATION --- */
+        @keyframes stardust-burst {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+                filter: brightness(1);
+            }
+            100% {
+                transform: translate(var(--dx), var(--dy)) scale(0);
+                opacity: 0;
+                filter: brightness(3);
+            }
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background-color: var(--ghostly-violet);
+            box-shadow: 0 0 5px var(--arcane-silver);
+            animation: stardust-burst 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; 
+            pointer-events: none; 
+            z-index: 50; 
+        }
+
+        .textarea-input {
+            background-color: rgba(240, 240, 255, 0.1);
+            color: var(--clean-scroll);
+            border: 1px solid rgba(176, 224, 230, 0.2);
+            resize: none;
+            transition: all 0.3s;
+        }
+        .textarea-input:focus {
+            outline: none;
+            border-color: var(--arcane-silver);
+            box-shadow: 0 0 8px var(--button-shadow);
+        }
+        
+        /* Make the original panel container invisible on load */
+        #original-panel-container {
+            display: none; 
+        }
+
+    </style>
+</head>
+<body class="selection:bg-violet-500 selection:text-white">
+
+    <div class="w-full max-w-lg mx-auto space-y-8">
+        
+        <!-- Header - Everglow Magic Studios -->
+        <header class="text-center">
+            <h1 class="glowing-title text-5xl font-extrabold mb-2">Everglow</h1>
+            <h2 class="text-xl text-clean-scroll/70 font-light tracking-widest">Image Enchantments</h2>
+        </header>
+
+        <!-- The Prompt Alchemist Card (Image Generator) -->
+        <div class="floating-card p-6 md:p-8 rounded-2xl text-center text-clean-scroll space-y-6">
+            
+            <div class="text-2xl font-bold tracking-wider" style="color: var(--arcane-silver);">
+                The Prompt Alchemist
+            </div>
+            
+            <p class="text-clean-scroll/90 text-sm">
+                Describe the image you wish to conjure, or upload an image to edit it with your prompt.
+            </p>
+            
+            <!-- Upload Button & Current Input Display -->
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-3">
+                <button id="upload-button" class="flex-1 w-full sm:w-auto font-semibold py-2 px-4 rounded-xl transition-all duration-300 transform" 
+                        style="background-color: var(--ghostly-violet); color: var(--midnight-indigo); box-shadow: 0 0 10px var(--ghostly-violet);">
+                    <i class="ph ph-upload-simple text-lg mr-2"></i> Upload Image
+                </button>
+                <div id="input-status" class="flex-1 text-xs text-clean-scroll/70 w-full sm:w-auto overflow-hidden text-ellipsis whitespace-nowrap">
+                    Status: Text-to-Image Mode.
+                </div>
+                <input type="file" id="image-input" accept="image/*" class="hidden">
+            </div>
+
+            <!-- Prompt Input -->
+            <textarea id="prompt-input" rows="3" placeholder="e.g., A wizard cat wearing a golden monocle, digital art, or 'Change the cat's monocle to sapphire.'" 
+                      class="textarea-input w-full p-3 rounded-lg"></textarea>
+
+            <!-- Image Comparison Area (New Structure) -->
+            <div class="py-4 flex flex-col sm:flex-row justify-center gap-4">
+                
+                <!-- 1. Original Image Panel (Input) - Initially hidden -->
+                <div class="flex-1 min-h-[16rem] space-y-2" id="original-panel-container">
+                    <div class="text-sm font-semibold text-clean-scroll/70" id="original-label">Original Vision (Input)</div>
+                    <img id="original-image-preview" class="hidden w-full h-full object-contain rounded-lg floating-card p-1 max-h-96 mx-auto" src="#" alt="Original Uploaded Image">
+                    <div id="original-image-placeholder" class="text-center text-clean-scroll/50 pt-16 hidden">
+                        Upload to compare.
+                    </div>
+                </div>
+
+                <!-- 2. Result Image Panel (Output) -->
+                <div class="flex-1 min-h-[16rem] space-y-2">
+                    <div class="text-sm font-semibold text-clean-scroll/70" id="result-label">Enchanted Result (Output)</div>
+                    <img id="result-image-preview" class="hidden w-full h-full object-contain rounded-lg floating-card p-1 max-h-96 mx-auto" src="#" alt="Generated Image">
+                    <div id="result-image-placeholder" class="text-center text-clean-scroll/50 pt-16">
+                        Your result will appear here.
+                    </div>
+                </div>
+
+            </div>
+            <!-- End Image Comparison Area -->
+
+            <div id="result-actions" class="hidden flex justify-center gap-4 pt-4">
+                <button id="download-button" class="flex items-center font-semibold py-2 px-4 rounded-xl transition-all duration-300 hover:scale-[1.05]" 
+                        style="background-color: var(--arcane-silver); color: var(--midnight-indigo); box-shadow: 0 0 10px var(--button-shadow);">
+                    <i class="ph ph-download-simple text-lg mr-2"></i> Download Result
+                </button>
+            </div>
+
+            <div class="h-16 flex flex-col items-center justify-center">
+                <!-- Amulet Spin/Loading State -->
+                <div id="loading-amulet" class="hidden w-10 h-10 border-4 border-arcane-silver border-t-transparent rounded-full animate-spin"></div>
+                <!-- Message Box -->
+                <div id="message-box" class="text-sm text-ghostly-violet hidden mt-2 font-semibold"></div>
+            </div>
+
+            <!-- Main Interaction Button -->
+            <button id="magic-button" class="w-full relative overflow-hidden font-bold py-3 px-6 rounded-xl transition-all duration-300 transform shadow-lg hover:scale-[1.01]" 
+                    style="background-color: var(--arcane-silver); color: var(--midnight-indigo); box-shadow: 0 0 15px var(--arcane-silver);">
+                <span class="relative z-10">Generate Enchanted Image</span>
+            </button>
+            
+            <p class="text-xs text-clean-scroll/50 pt-4">
+                Powered by Everglow Magic. Expect the impossible.
+            </p>
+        </div>
+        
+    </div>
+
+    <!-- --- BEAUTIFY MODAL (New Element) --- -->
+    <div id="beautify-modal-backdrop" class="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm hidden z-[100] flex items-center justify-center p-4">
+        <div id="beautify-modal" class="floating-card p-6 rounded-xl w-full max-w-sm text-center space-y-4 border-2" 
+             style="background-color: var(--midnight-indigo); border-color: var(--ghostly-violet);">
+            
+            <i class="ph ph-sparkle text-5xl" style="color: var(--arcane-silver);"></i>
+            <h3 class="text-xl font-bold" style="color: var(--clean-scroll);">Instant Enchantment Detected!</h3>
+            
+            <p class="text-sm text-clean-scroll/80">
+                Would you like to automatically **Beautify and Enhance** the uploaded portrait (<span id="modal-filename" class="font-semibold">file.jpg</span>) for a professional, magazine-quality finish?
+            </p>
+
+            <div class="flex gap-4 justify-center pt-2">
+                <button id="modal-confirm" class="font-bold py-2 px-4 rounded-lg transition-all duration-200 hover:scale-105"
+                        style="background-color: var(--arcane-silver); color: var(--midnight-indigo);">
+                    <i class="ph ph-magic-wand text-lg mr-1"></i> Yes, Beautify!
+                </button>
+                <button id="modal-decline" class="font-semibold py-2 px-4 rounded-lg transition-all duration-200 hover:scale-105"
+                        style="background-color: rgba(255, 255, 255, 0.1); color: var(--clean-scroll);">
+                    No, I'll Write My Own Prompt
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- --------------------------------------- -->
+
+
+    <script>
+        const promptInput = document.getElementById('prompt-input');
+        const magicButton = document.getElementById('magic-button');
+        const loadingAmulet = document.getElementById('loading-amulet');
+        const messageBox = document.getElementById('message-box');
+        
+        // Image Preview Elements
+        const originalPanelContainer = document.getElementById('original-panel-container'); // NEW
+        const originalLabel = document.getElementById('original-label'); // NEW
+        const originalImagePreview = document.getElementById('original-image-preview');
+        const originalImagePlaceholder = document.getElementById('original-image-placeholder');
+        const resultImagePreview = document.getElementById('result-image-preview');
+        const resultImagePlaceholder = document.getElementById('result-image-placeholder');
+
+        const uploadButton = document.getElementById('upload-button');
+        const imageInput = document.getElementById('image-input');
+        const inputStatus = document.getElementById('input-status');
+        const downloadButton = document.getElementById('download-button');
+        const resultActions = document.getElementById('result-actions');
+        
+        // Modal Elements
+        const beautifyModalBackdrop = document.getElementById('beautify-modal-backdrop');
+        const modalConfirmButton = document.getElementById('modal-confirm');
+        const modalDeclineButton = document.getElementById('modal-decline');
+        const modalFileNameSpan = document.getElementById('modal-filename');
+
+        // CONSTANTS
+        const IMAGE_GENERATION_MODEL = 'gemini-2.5-flash-image-preview';
+        const apiKey = ""; 
+        const BEAUTIFY_PROMPT = "Enhance the photo quality, brighten the subject's face, smooth skin imperfections naturally, sharpen facial details, and gently improve lighting and saturation for a professional, magazine-quality portrait look. Maintain original composition.";
+        
+        // State variable
+        let currentBase64Image = null; // Holds the last generated image (for next input)
+        let originalUploadedBase64Image = null; // Holds the user's initial upload (to reset)
+
+        // Function to create and animate the ghostly violet particles
+        function animateStardustBurst(sourceElement = magicButton) {
+            const rect = sourceElement.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            const numberOfParticles = 30;
+
+            for (let i = 0; i < numberOfParticles; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                const angle = Math.random() * 2 * Math.PI;
+                const distance = Math.random() * 150 + 50; 
+
+                const dx = Math.cos(angle) * distance;
+                const dy = Math.sin(angle) * distance;
+
+                particle.style.setProperty('--dx', `${dx}px`);
+                particle.style.setProperty('--dy', `${dy}px`);
+
+                particle.style.left = `${centerX - 2}px`;
+                particle.style.top = `${centerY - 2}px`;
+
+                document.body.appendChild(particle);
+
+                particle.addEventListener('animationend', () => {
+                    particle.remove();
+                });
+            }
+        }
+        
+        // Helper functions for Base64 conversion
+        function base64UrlToData(base64Url) {
+            if (base64Url && base64Url.includes(',')) {
+                return base64Url.substring(base64Url.indexOf(',') + 1);
+            }
+            return null;
+        }
+
+        function base64UrlToMimeType(base64Url) {
+            if (base64Url && base64Url.includes(':') && base64Url.includes(';')) {
+                return base64Url.substring(base64Url.indexOf(':') + 1, base64Url.indexOf(';'));
+            }
+            return 'image/png'; 
+        }
+        
+        // Handles the API call for image generation (multimodal)
+        async function generateImage(userPrompt, inputBase64) {
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${IMAGE_GENERATION_MODEL}:generateContent?key=${apiKey}`;
+            
+            let contentsParts = [{ text: userPrompt }];
+
+            if (inputBase64) {
+                // Add the image part for image editing (image-to-image)
+                const mimeType = base64UrlToMimeType(inputBase64);
+                const data = base64UrlToData(inputBase64);
+
+                contentsParts.push({
+                    inlineData: {
+                        mimeType: mimeType,
+                        data: data
+                    }
+                });
+            }
+
+            const payload = {
+                contents: [{ parts: contentsParts }],
+                generationConfig: {
+                    responseModalities: ['TEXT', 'IMAGE']
+                }
+            };
+
+            const maxRetries = 3;
+            let currentRetry = 0;
+
+            while (currentRetry < maxRetries) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        const errorBody = await response.json();
+                        throw new Error(`API Request failed: ${response.status} - ${errorBody.error.message}`);
+                    }
+
+                    const result = await response.json();
+                    
+                    const imagePart = result?.candidates?.[0]?.content?.parts?.find(p => p.inlineData && p.inlineData.mimeType.startsWith('image/'));
+
+                    if (imagePart) {
+                        const mimeType = imagePart.inlineData.mimeType;
+                        const base64Data = imagePart.inlineData.data;
+                        return `data:${mimeType};base64,${base64Data}`;
+                    } else {
+                        throw new Error("Received empty or invalid image data from API.");
+                    }
+                } catch (error) {
+                    console.error(`Attempt ${currentRetry + 1} failed:`, error);
+                    currentRetry++;
+                    if (currentRetry < maxRetries) {
+                        // Exponential backoff
+                        const delay = Math.pow(2, currentRetry) * 1000;
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                    } else {
+                        throw new Error(`Failed to generate image after ${maxRetries} attempts.`);
+                    }
+                }
+            }
+        }
+        
+        // --- Modal Control Functions ---
+
+        function showBeautifyModal(fileName) {
+            modalFileNameSpan.textContent = fileName;
+            beautifyModalBackdrop.classList.remove('hidden');
+        }
+
+        function hideBeautifyModal() {
+            beautifyModalBackdrop.classList.add('hidden');
+        }
+
+        function proceedToCustomPrompt(fileName) {
+            hideBeautifyModal();
+            inputStatus.textContent = `Input: ${fileName} | Mode: Edit by Prompt.`;
+            promptInput.placeholder = "Describe the changes you want to the uploaded image...";
+            // --- MAGIC EFFECT: Upload Complete ---
+            animateStardustBurst(uploadButton);
+        }
+        
+        // --- Input Handling ---
+        
+        function handleImageUpload() {
+            const file = imageInput.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const base64Url = e.target.result;
+                originalUploadedBase64Image = base64Url; // Store the initial upload
+                currentBase64Image = base64Url; // Current base for the first spell is the upload
+
+                // 1. Set the ORIGINAL image panel
+                originalPanelContainer.style.display = 'block'; // Make panel visible
+                originalImagePreview.src = base64Url;
+                originalImagePreview.classList.remove('hidden');
+                originalImagePlaceholder.classList.add('hidden');
+                
+                // Clear the result area for a fresh edit
+                resultImagePreview.classList.add('hidden');
+                resultImagePlaceholder.classList.remove('hidden');
+                resultActions.classList.add('hidden'); 
+
+                promptInput.value = ''; // Clear prompt input before asking
+
+                // --- Trigger the Beautification Modal ---
+                showBeautifyModal(file.name);
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        uploadButton.addEventListener('click', () => {
+            imageInput.click();
+        });
+        
+        imageInput.addEventListener('change', handleImageUpload);
+        
+        // --- Modal Button Event Handlers ---
+
+        modalDeclineButton.addEventListener('click', () => {
+            const fileName = imageInput.files[0]?.name || 'Uploaded Image';
+            proceedToCustomPrompt(fileName);
+        });
+
+        modalConfirmButton.addEventListener('click', () => {
+            hideBeautifyModal();
+            promptInput.value = BEAUTIFY_PROMPT;
+            
+            // Set input status immediately, then trigger the generation
+            inputStatus.textContent = `Input: Auto-Enhance | Mode: Processing Enchantment...`;
+            handleMagicButtonClick();
+        });
+
+
+        // --- Download Functionality ---
+        
+        function downloadImage() {
+  
