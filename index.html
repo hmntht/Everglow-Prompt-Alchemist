@@ -11,13 +11,14 @@
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
     <style>
-        /* Define Theme Colors (Softer, Cooler Glow) */
+        /* Define Theme Colors (Deeper Magical Glow based on image 1000439812.jpg) */
         :root {
-            --midnight-indigo: #0D113C; /* Deep Background */
-            --arcane-silver: #B0E0E6; /* Main Accent/Interaction (Powder Blue) */
-            --ghostly-violet: #DDA0DD; /* Highlight/Glow (Plum/Light Magenta) */
+            --midnight-indigo: #0C0D2F; /* Very Deep Blue/Violet Background */
+            --arcane-silver: #D0EFFF; /* Light Accent (for main text/borders) */
+            --ghostly-violet: #C9A0DD; /* Sub-Accent/Interaction (Soft Lavender) */
+            --magic-pink: #DDA0DD; /* Upload Button & Intense Glow (Light Magenta/Plum) */
             --clean-scroll: #F0F0FF;
-            --button-shadow: rgba(176, 224, 230, 0.4);
+            --button-shadow: rgba(221, 160, 221, 0.6); /* Shadow matching magic-pink */
         }
 
         body {
@@ -29,20 +30,31 @@
             align-items: center;
             justify-content: center;
             padding: 2rem 1rem;
+            /* Subtle background noise/texture for depth */
+            background-image: radial-gradient(circle at center, rgba(12, 13, 47, 0) 0%, rgba(12, 13, 47, 0.8) 100%);
         }
 
         /* --- GLOW EFFECTS (Core of the Magic Theme) --- */
         .glowing-title {
             color: var(--arcane-silver);
-            text-shadow: 0 0 8px rgba(176, 224, 230, 0.5), 0 0 15px rgba(176, 224, 230, 0.3);
+            text-shadow: 0 0 10px rgba(208, 239, 255, 0.4), 0 0 20px rgba(208, 239, 255, 0.2);
         }
 
         .floating-card {
-            background-color: rgba(240, 240, 255, 0.05);
-            border: 1px solid rgba(176, 224, 230, 0.3); /* Softer border */
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 
-                        0 0 10px var(--ghostly-violet); /* Deep shadow + Violet glow */
-            backdrop-filter: blur(5px);
+            /* Increased transparency for a ghostly glass effect */
+            background-color: rgba(240, 240, 255, 0.03); 
+            border: 1px solid rgba(201, 160, 221, 0.5); /* Violet border */
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7), 
+                        0 0 15px var(--magic-pink); /* Deep shadow + Pink glow */
+            backdrop-filter: blur(8px); /* Deeper blur */
+        }
+
+        /* --- MAGIC BUTTON GLOW EFFECT --- */
+        .magic-button-glow {
+            transition: all 0.3s ease-in-out;
+        }
+        .magic-button-glow:hover {
+            box-shadow: 0 0 20px var(--arcane-silver), 0 0 30px var(--arcane-silver);
         }
 
         /* --- GHOSTLY VIOLET PARTICLE ANIMATION --- */
@@ -64,7 +76,7 @@
             width: 4px;
             height: 4px;
             border-radius: 50%;
-            background-color: var(--ghostly-violet);
+            background-color: var(--magic-pink);
             box-shadow: 0 0 5px var(--arcane-silver);
             animation: stardust-burst 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; 
             pointer-events: none; 
@@ -72,9 +84,9 @@
         }
 
         .textarea-input {
-            background-color: rgba(240, 240, 255, 0.1);
+            background-color: rgba(240, 240, 255, 0.08); /* Darker input background */
             color: var(--clean-scroll);
-            border: 1px solid rgba(176, 224, 230, 0.2);
+            border: 1px solid rgba(201, 160, 221, 0.3);
             resize: none;
             transition: all 0.3s;
         }
@@ -84,7 +96,7 @@
             box-shadow: 0 0 8px var(--button-shadow);
         }
         
-        /* Make the original panel container invisible on load */
+        /* Ensure specific elements are correctly hidden for the clean layout */
         #original-panel-container {
             display: none; 
         }
@@ -104,34 +116,39 @@
         <!-- The Prompt Alchemist Card (Image Generator) -->
         <div class="floating-card p-6 md:p-8 rounded-2xl text-center text-clean-scroll space-y-6">
             
-            <div class="text-2xl font-bold tracking-wider" style="color: var(--arcane-silver);">
+            <!-- Card Title -->
+            <div class="text-3xl font-bold tracking-wider mb-4" style="color: var(--arcane-silver);">
                 The Prompt Alchemist
             </div>
             
-            <p class="text-clean-scroll/90 text-sm">
+            <p class="text-clean-scroll/90 text-md">
                 Describe the image you wish to conjure, or upload an image to edit it with your prompt.
             </p>
             
-            <!-- Upload Button & Current Input Display -->
-            <div class="flex flex-col sm:flex-row justify-center items-center gap-3">
-                <button id="upload-button" class="flex-1 w-full sm:w-auto font-semibold py-2 px-4 rounded-xl transition-all duration-300 transform" 
-                        style="background-color: var(--ghostly-violet); color: var(--midnight-indigo); box-shadow: 0 0 10px var(--ghostly-violet);">
-                    <i class="ph ph-upload-simple text-lg mr-2"></i> Upload Image
+            <!-- 1. Upload Button -->
+            <div class="w-full pt-4 pb-2">
+                <button id="upload-button" class="w-full max-w-sm mx-auto flex items-center justify-center font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02]" 
+                        style="background-color: var(--magic-pink); color: var(--midnight-indigo); box-shadow: 0 0 15px var(--button-shadow);">
+                    <i class="ph ph-upload-simple text-xl mr-2"></i> Upload Image
                 </button>
-                <div id="input-status" class="flex-1 text-xs text-clean-scroll/70 w-full sm:w-auto overflow-hidden text-ellipsis whitespace-nowrap">
-                    Status: Text-to-Image Mode.
-                </div>
-                <input type="file" id="image-input" accept="image/*" class="hidden">
             </div>
 
-            <!-- Prompt Input -->
-            <textarea id="prompt-input" rows="3" placeholder="e.g., A wizard cat wearing a golden monocle, digital art, or 'Change the cat's monocle to sapphire.'" 
-                      class="textarea-input w-full p-3 rounded-lg"></textarea>
+            <!-- Native File Input (Always Hidden) -->
+            <input type="file" id="image-input" accept="image/*" class="hidden">
+            
+            <!-- 2. Status Display (Separated) -->
+            <div id="input-status" class="text-sm text-clean-scroll/70 w-full overflow-hidden text-ellipsis whitespace-nowrap pt-2">
+                Status: Text-to-Image Mode.
+            </div>
 
-            <!-- Image Comparison Area (New Structure) -->
+            <!-- 3. Prompt Input (Full Width Block) -->
+            <textarea id="prompt-input" rows="4" placeholder="e.g., A wizard cat wearing a golden monocle, digital art, or 'Change the cat's monocle to sapphire.'" 
+                      class="textarea-input w-full p-4 rounded-xl text-left"></textarea>
+
+            <!-- Image Comparison Area -->
             <div class="py-4 flex flex-col sm:flex-row justify-center gap-4">
                 
-                <!-- 1. Original Image Panel (Input) - Initially hidden -->
+                <!-- Original Image Panel (Input) - Initially hidden -->
                 <div class="flex-1 min-h-[16rem] space-y-2" id="original-panel-container">
                     <div class="text-sm font-semibold text-clean-scroll/70" id="original-label">Original Vision (Input)</div>
                     <img id="original-image-preview" class="hidden w-full h-full object-contain rounded-lg floating-card p-1 max-h-96 mx-auto" src="#" alt="Original Uploaded Image">
@@ -140,7 +157,7 @@
                     </div>
                 </div>
 
-                <!-- 2. Result Image Panel (Output) -->
+                <!-- Result Image Panel (Output) -->
                 <div class="flex-1 min-h-[16rem] space-y-2">
                     <div class="text-sm font-semibold text-clean-scroll/70" id="result-label">Enchanted Result (Output)</div>
                     <img id="result-image-preview" class="hidden w-full h-full object-contain rounded-lg floating-card p-1 max-h-96 mx-auto" src="#" alt="Generated Image">
@@ -154,7 +171,7 @@
 
             <div id="result-actions" class="hidden flex justify-center gap-4 pt-4">
                 <button id="download-button" class="flex items-center font-semibold py-2 px-4 rounded-xl transition-all duration-300 hover:scale-[1.05]" 
-                        style="background-color: var(--arcane-silver); color: var(--midnight-indigo); box-shadow: 0 0 10px var(--button-shadow);">
+                        style="background-color: var(--arcane-silver); color: var(--midnight-indigo); box-shadow: 0 0 10px var(--arcane-silver);">
                     <i class="ph ph-download-simple text-lg mr-2"></i> Download Result
                 </button>
             </div>
@@ -167,8 +184,8 @@
             </div>
 
             <!-- Main Interaction Button -->
-            <button id="magic-button" class="w-full relative overflow-hidden font-bold py-3 px-6 rounded-xl transition-all duration-300 transform shadow-lg hover:scale-[1.01]" 
-                    style="background-color: var(--arcane-silver); color: var(--midnight-indigo); box-shadow: 0 0 15px var(--arcane-silver);">
+            <button id="magic-button" class="w-full relative overflow-hidden font-bold py-4 px-6 rounded-xl transition-all duration-300 transform shadow-lg magic-button-glow" 
+                    style="background-color: var(--arcane-silver); color: var(--midnight-indigo); box-shadow: 0 0 10px var(--arcane-silver);">
                 <span class="relative z-10">Generate Enchanted Image</span>
             </button>
             
@@ -179,10 +196,10 @@
         
     </div>
 
-    <!-- --- BEAUTIFY MODAL (New Element) --- -->
+    <!-- --- BEAUTIFY MODAL (Appears on Image Upload) --- -->
     <div id="beautify-modal-backdrop" class="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm hidden z-[100] flex items-center justify-center p-4">
         <div id="beautify-modal" class="floating-card p-6 rounded-xl w-full max-w-sm text-center space-y-4 border-2" 
-             style="background-color: var(--midnight-indigo); border-color: var(--ghostly-violet);">
+             style="background-color: var(--midnight-indigo); border-color: var(--magic-pink);">
             
             <i class="ph ph-sparkle text-5xl" style="color: var(--arcane-silver);"></i>
             <h3 class="text-xl font-bold" style="color: var(--clean-scroll);">Instant Enchantment Detected!</h3>
@@ -193,7 +210,7 @@
 
             <div class="flex gap-4 justify-center pt-2">
                 <button id="modal-confirm" class="font-bold py-2 px-4 rounded-lg transition-all duration-200 hover:scale-105"
-                        style="background-color: var(--arcane-silver); color: var(--midnight-indigo);">
+                        style="background-color: var(--magic-pink); color: var(--midnight-indigo); box-shadow: 0 0 8px var(--button-shadow);">
                     <i class="ph ph-magic-wand text-lg mr-1"></i> Yes, Beautify!
                 </button>
                 <button id="modal-decline" class="font-semibold py-2 px-4 rounded-lg transition-all duration-200 hover:scale-105"
@@ -237,13 +254,12 @@
         const apiKey = ""; // Canvas environment will inject API key
         const BEAUTIFY_PROMPT = "Enhance the photo quality, brighten the subject's face, smooth skin imperfections naturally, sharpen facial details, and gently improve lighting and saturation for a professional, magazine-quality portrait look. Maintain original composition.";
         
-        // State variable
-        let currentBase64Image = null; // Holds the last generated image (for next input/chaining)
-        let originalUploadedBase64Image = null; // Holds the user's initial upload (to reset/compare)
+        let currentBase64Image = null; 
+        let originalUploadedBase64Image = null;
 
         // --- Utility Functions ---
 
-        // Function to create and animate the ghostly violet particles
+        // Function to create and animate the ghostly violet particles (Magic Effect)
         function animateStardustBurst(sourceElement = magicButton) {
             const rect = sourceElement.getBoundingClientRect();
             const centerX = rect.left + rect.width / 2;
@@ -262,6 +278,7 @@
                 const dy = Math.sin(angle) * distance;
 
                 particle.style.setProperty('--dx', `${dx}px`);
+                particle.style.setProperty('--dy', `${dy}px`);
                 particle.style.left = `${centerX - 2}px`;
                 particle.style.top = `${centerY - 2}px`;
 
@@ -273,7 +290,6 @@
             }
         }
         
-        // Helper functions for Base64 conversion
         function base64UrlToData(base64Url) {
             if (base64Url && base64Url.includes(',')) {
                 return base64Url.substring(base64Url.indexOf(',') + 1);
@@ -300,9 +316,11 @@
                 loadingAmulet.classList.remove('hidden');
                 messageBox.classList.add('hidden');
                 resultActions.classList.add('hidden');
+                magicButton.classList.remove('magic-button-glow');
             } else {
                 magicButton.innerHTML = `<span class="relative z-10">Generate Enchanted Image</span>`;
                 loadingAmulet.classList.add('hidden');
+                magicButton.classList.add('magic-button-glow');
             }
         }
         
@@ -310,9 +328,9 @@
             messageBox.textContent = text;
             messageBox.classList.remove('hidden');
             if (type === "error") {
-                messageBox.style.color = 'red';
+                messageBox.style.color = '#FF5555'; /* Brighter red for error */
             } else if (type === "success") {
-                messageBox.style.color = 'var(--arcane-silver)';
+                messageBox.style.color = 'var(--magic-pink)';
                 animateStardustBurst(magicButton);
             } else {
                 messageBox.style.color = 'var(--ghostly-violet)';
@@ -359,10 +377,8 @@
                     if (!response.ok) {
                         const errorBody = await response.json();
                         if (response.status === 429 && currentRetry < maxRetries - 1) {
-                            // Rate limit, retry
                             throw new Error('Rate limit exceeded. Retrying...');
                         } else {
-                            // Non-retryable error or final failure
                             throw new Error(`API Request failed: ${response.status} - ${errorBody.error.message}`);
                         }
                     }
@@ -376,10 +392,9 @@
                         const base64Data = imagePart.inlineData.data;
                         return `data:${mimeType};base64,${base64Data}`;
                     } else {
-                        // Check for text-only error messages from the model
-                        const textPart = result?.candidates?.[0]?.content?.parts?.find(p => p.text);
+                        const textPart = result?.candidates?.[0]?.content?.parts?.[0]?.text;
                         if (textPart) {
-                             throw new Error(textPart.text);
+                             throw new Error(textPart);
                         } else {
                             throw new Error("Received empty or invalid image data from API.");
                         }
@@ -387,7 +402,6 @@
                 } catch (error) {
                     currentRetry++;
                     if (currentRetry < maxRetries) {
-                        // Exponential backoff delay
                         const delay = Math.pow(2, currentRetry) * 1000;
                         await new Promise(resolve => setTimeout(resolve, delay));
                     } else {
@@ -402,7 +416,7 @@
         function resetAppState() {
             currentBase64Image = null;
             originalUploadedBase64Image = null;
-            imageInput.value = null; // Clear file input
+            imageInput.value = null; 
             
             promptInput.value = '';
             promptInput.placeholder = "e.g., A wizard cat wearing a golden monocle, digital art, or 'Change the cat's monocle to sapphire.'";
@@ -423,8 +437,6 @@
             setLoadingState(false);
         }
 
-        // --- Modal Control Functions ---
-
         function showBeautifyModal(fileName) {
             modalFileNameSpan.textContent = fileName;
             beautifyModalBackdrop.classList.remove('hidden');
@@ -444,7 +456,6 @@
         function handleImageUpload() {
             const file = imageInput.files[0];
             if (!file) {
-                // If user opens the dialog and cancels, reset to text-to-image mode
                 resetAppState(); 
                 return;
             }
@@ -490,10 +501,8 @@
             try {
                 const resultBase64 = await generateImage(userPrompt, currentBase64Image);
                 
-                // Set the result for potential subsequent edits
                 currentBase64Image = resultBase64; 
 
-                // Update UI
                 resultImagePreview.src = resultBase64;
                 resultImagePreview.classList.remove('hidden');
                 resultImagePlaceholder.classList.add('hidden');
@@ -515,7 +524,6 @@
             }
         }
 
-        // --- Download Functionality ---
         function downloadImage() {
             const resultImageSrc = resultImagePreview.src;
             if (resultImageSrc && resultImagePreview.classList.contains('hidden') === false) {
@@ -559,9 +567,9 @@
         magicButton.addEventListener('click', handleMagicButtonClick);
         downloadButton.addEventListener('click', downloadImage);
 
-        // Initialize state on load
         document.addEventListener('DOMContentLoaded', resetAppState);
     </script>
 </body>
 </html>
+
 
