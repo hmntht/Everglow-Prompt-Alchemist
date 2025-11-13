@@ -1,0 +1,102 @@
+/*
+ * Everglow - The Magic Alchemist Stylesheet
+ * This provides the dark theme, colors, and component styles.
+ */
+
+:root {
+    --bg-dark: #0a0a20; /* Deep dark blue/purple background */
+    --text-light: #f0f0ff; /* Light, slightly blue-tinted text */
+    --accent-pink: #ff69b4; /* Vibrant pink for accents and glow */
+    --accent-blue: #6495ed; /* Soft blue for highlights */
+    --card-bg: rgba(255, 255, 255, 0.05); /* Slightly transparent card background */
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-light);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+}
+
+/* Global Utility Classes */
+
+.glowing-title {
+    color: var(--text-light);
+    text-shadow: 0 0 10px var(--accent-pink), 0 0 20px var(--accent-pink);
+    transition: text-shadow 0.3s ease-in-out;
+}
+
+.floating-card {
+    background-color: var(--card-bg);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+}
+
+/* Input/Textarea Styles */
+
+.textarea-input {
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: var(--text-light);
+    resize: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.textarea-input:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 8px rgba(100, 149, 237, 0.5);
+}
+
+/* Button Styles */
+
+.btn-accent {
+    background-color: var(--accent-pink);
+    color: var(--bg-dark); /* Dark text on bright background */
+    box-shadow: 0 4px 15px rgba(255, 105, 180, 0.4);
+}
+
+.btn-accent:hover {
+    background-color: #ff85c1;
+    box-shadow: 0 6px 20px rgba(255, 105, 180, 0.6);
+}
+
+.btn-primary {
+    background-color: var(--accent-blue);
+    color: var(--bg-dark);
+    box-shadow: 0 4px 15px rgba(100, 149, 237, 0.4);
+}
+
+.btn-primary:hover {
+    background-color: #8bb8fc;
+    box-shadow: 0 6px 20px rgba(100, 149, 237, 0.6);
+}
+
+
+/* Modal Styles */
+
+#beautify-modal-backdrop {
+    /* Ensures the backdrop is initially hidden but styles the blur */
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+}
+
+#beautify-modal-backdrop.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Animation for loading amulet */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+#loading-amulet {
+    border-top-color: transparent !important; /* Ensure the top is transparent for spinning effect */
+}
