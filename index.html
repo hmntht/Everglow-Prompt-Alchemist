@@ -4,11 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Everglow - The Magic Alchemist</title>
-    <!-- Load Tailwind CSS -->
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <!-- Load Phosphor Icons -->
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
     <style>
         /* Define Theme Colors: Playful Magic (Deep Blue/Violet, Vibrant Pink/Teal) */
@@ -123,10 +121,12 @@
                 Whisper your **Spell**, or upload an image to refine its essence.
             </p>
             
-            <!-- 1. Upload Button (TEXT FIXED HERE) -->
+            <!-- 1. Upload Button -->
             <div class="w-full pt-4 pb-2">
                 <button id="upload-button" class="w-full max-w-sm mx-auto flex items-center justify-center font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] btn-accent">
-                    <i class="ph ph-upload-simple text-xl mr-2"></i> Upload Image
+                    <!-- Inline SVG for Upload Icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-2" viewBox="0 0 256 256"><path fill="currentColor" d="M165.66 202.34a8 8 0 0 1-11.32 11.32l-40-40a8 8 0 0 1 0-11.32l40-40a8 8 0 0 1 11.32 11.32L133.31 152H216a8 8 0 0 1 0 16h-82.69Z"/><path fill="currentColor" d="M128 224a8 8 0 0 1-8-8V40a8 8 0 0 1 16 0v176a8 8 0 0 1-8 8Z"/></svg>
+                    Upload Image
                 </button>
             </div>
 
@@ -168,7 +168,9 @@
 
             <div id="result-actions" class="hidden flex justify-center gap-4 pt-4">
                 <button id="download-button" class="flex items-center font-semibold py-2 px-4 rounded-xl transition-all duration-300 hover:scale-[1.05] btn-primary">
-                    <i class="ph ph-download-simple text-lg mr-2"></i> Download Enchantment
+                    <!-- Inline SVG for Download Icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" viewBox="0 0 256 256"><path fill="currentColor" d="M208 80h-48V32a8 8 0 0 0-8-8h-48a8 8 0 0 0-8 8v48H48a8 8 0 0 0-5.66 13.66l80 80a8 8 0 0 0 11.32 0l80-80A8 8 0 0 0 208 80Z"/><path fill="currentColor" d="M216 168a8 8 0 0 0-8 8v40H48v-40a8 8 0 0 0-16 0v40a16 16 0 0 0 16 16h160a16 16 0 0 0 16-16v-40a8 8 0 0 0-8-8Z"/></svg>
+                    Download Enchantment
                 </button>
             </div>
 
@@ -196,7 +198,8 @@
         <div id="beautify-modal" class="floating-card p-6 rounded-xl w-full max-w-sm text-center space-y-4 border-2" 
              style="background-color: #1a1a3a; border-color: var(--accent-pink);">
             
-            <i class="ph ph-sparkle text-5xl" style="color: var(--accent-pink);"></i>
+            <!-- Inline SVG for Sparkle Icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 mx-auto" style="color: var(--accent-pink);" viewBox="0 0 256 256"><path fill="currentColor" d="M232.88 123.06a8 8 0 0 0-14.8-5.32l-18 29.54l-29.54 18a8 8 0 0 0 5.32 14.8l18-29.54l29.54-18a8 8 0 0 0 9.28-5.48ZM141.13 147.25a8 8 0 0 0-1.88 1.88l-18 29.54a8 8 0 0 0 14.8 5.32l18-29.54a8 8 0 0 0-5.32-14.8ZM210.63 77.12l-18 29.54l-29.54 18a8 8 0 0 0 5.32 14.8l18-29.54l29.54-18a8 8 0 0 0-5.32-14.8Zm-91.75 30.13a8 8 0 0 0-1.88 1.88l-18 29.54a8 8 0 0 0 14.8 5.32l18-29.54a8 8 0 0 0-5.32-14.8ZM164 48a8 8 0 0 0-8-8H48a16 16 0 0 0-16 16v144a16 16 0 0 0 16 16h144a16 16 0 0 0 16-16v-92a8 8 0 0 0-16 0v92a8 8 0 0 1-8 8H48a8 8 0 0 1-8-8V64a8 8 0 0 1 8-8h108a8 8 0 0 0 8-8Z"/></svg>
             <h3 class="text-xl font-bold" style="color: var(--text-light);">Instant Magic Boost!</h3>
             
             <p class="text-sm text-text-light/80">
@@ -205,7 +208,9 @@
 
             <div class="flex gap-4 justify-center pt-2">
                 <button id="modal-confirm" class="font-bold py-2 px-4 rounded-lg transition-all duration-200 hover:scale-105 btn-primary">
-                    <i class="ph ph-magic-wand text-lg mr-1"></i> Initiate Magic Boost
+                    <!-- Inline SVG for Magic Wand Icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 inline mr-1" viewBox="0 0 256 256"><path fill="currentColor" d="M128 24a8 8 0 0 0-8 8v40a8 8 0 0 0 16 0V32a8 8 0 0 0-8-8Z"/><path fill="currentColor" d="M224 128a8 8 0 0 0-8-8h-40a8 8 0 0 0 0 16h40a8 8 0 0 0 8-8Z"/><path fill="currentColor" d="M88 128a8 8 0 0 0-8-8H40a8 8 0 0 0 0 16h40a8 8 0 0 0 8-8Z"/><path fill="currentColor" d="M165.66 80.46l-28.28 28.29a8 8 0 0 0-2.31 5.61v64.64l-40 40a8 8 0 0 0 5.66 13.66l64-32a8 8 0 0 0 4.24-11.58l-8-12.87l27.18 27.17a8 8 0 0 0 11.32-11.32L171.74 153.6a8 8 0 0 0 2.31-5.61v-64.64l40-40a8 8 0 0 0-5.66-13.66Z"/><path fill="currentColor" d="M128 176a8 8 0 0 0 0-16a8 8 0 0 0 0 16Z"/></svg>
+                    Initiate Magic Boost
                 </button>
                 <button id="modal-decline" class="font-semibold py-2 px-4 rounded-lg transition-all duration-200 hover:scale-105"
                         style="background-color: rgba(255, 255, 255, 0.1); color: var(--text-light);">
@@ -245,7 +250,8 @@
 
         // --- CONSTANTS & State ---
         const IMAGE_GENERATION_MODEL = 'gemini-2.5-flash-image-preview';
-        const apiKey = "AIzaSyDdOkFYez625UjfgfOSefxA4JGdmLg_PXQ"; 
+        // Vercel securely injects the key into a process.env variable.
+        const apiKey = typeof process !== 'undefined' && process.env.NEXT_PUBLIC_GEMINI_API_KEY ? process.env.NEXT_PUBLIC_GEMINI_API_KEY : 'AIzaSyDdOkFYez625UjfgfOSefxA4JGdmLg_PXQ'; 
         const BEAUTIFY_PROMPT = "Enhance the photo quality to 8K cinematic detail, brighten the subject's face, smooth skin imperfections naturally, sharpen facial details, and gently improve lighting and saturation for a professional, high-end look. Maintain original composition.";
         
         let currentBase64Image = null; 
@@ -332,7 +338,12 @@
         // --- Core API Integration (Exponential Backoff included) ---
         
         async function generateImage(userPrompt, inputBase64) {
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${IMAGE_GENERATION_MODEL}:generateContent?key=${apiKey}`;
+            const finalApiKey = apiKey;
+            if (!finalApiKey || finalApiKey === 'AIzaSyDdOkFYez625UjfgfOSefxA4JGdmLg_PXQ') {
+                throw new Error("API Key Missing or Placeholder. Please set NEXT_PUBLIC_GEMINI_API_KEY in Vercel.");
+            }
+
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${IMAGE_GENERATION_MODEL}:generateContent?key=${finalApiKey}`;
             
             let contentsParts = [{ text: userPrompt }];
 
@@ -440,4 +451,149 @@
 
         function proceedToCustomPrompt(fileName) {
             hideBeautifyModal();
-            inputStatus.textContent = `Source: ${fileName} | Mode: Refine Spel
+            inputStatus.textContent = `Source: ${fileName} | Mode: Refine Spell.`;
+            promptInput.placeholder = "Describe the precise changes you want to the uploaded image...";
+            animateStardustBurst(uploadButton);
+        }
+        
+        function handleImageUpload() {
+            const file = imageInput.files[0];
+            if (!file) {
+                resetAppState(); 
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const base64Url = e.target.result;
+                originalUploadedBase64Image = base64Url;
+                currentBase64Image = base64Url;
+
+                originalPanelContainer.style.display = 'block';
+                originalImagePreview.src = base64Url;
+                originalImagePreview.classList.remove('hidden');
+                originalImagePlaceholder.classList.add('hidden');
+                
+                resultImagePreview.classList.add('hidden');
+                resultImagePlaceholder.classList.remove('hidden');
+                resultActions.classList.add('hidden'); 
+
+                promptInput.value = '';
+
+                showBeautifyModal(file.name);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function handleModalDecline() {
+            const fileName = imageInput.files[0]?.name || 'Source Magic';
+            proceedToCustomPrompt(fileName);
+        }
+
+        function handleModalConfirm() {
+            hideBeautifyModal();
+            promptInput.value = BEAUTIFY_PROMPT;
+            inputStatus.textContent = `Source: Instant Boost | Mode: Brewing Potion...`;
+            handleMagicButtonClick();
+        }
+        
+        async function handleMagicButtonClick() {
+            const userPrompt = promptInput.value.trim();
+            
+            if (!userPrompt && !currentBase64Image) {
+                showMessage("Spell failure. Please whisper a description.", "error");
+                return;
+            }
+
+            if (!userPrompt && currentBase64Image) {
+                showMessage("Refinement error. You must enter a prompt to edit the source magic.", "error");
+                return;
+            }
+
+            setLoadingState(true, "BREWING THE POTION...");
+            showMessage("Initiating Spellcasting...", "info");
+
+            try {
+                const resultBase64 = await generateImage(userPrompt, currentBase64Image);
+                
+                // Move the previous result to the 'Original' panel for comparison/iteration
+                if (resultImagePreview.src && resultImagePreview.classList.contains('hidden') === false) {
+                    originalPanelContainer.style.display = 'block';
+                    originalImagePreview.src = resultImagePreview.src;
+                    originalImagePreview.classList.remove('hidden');
+                    originalImagePlaceholder.classList.add('hidden');
+                } else {
+                    // If this is the first image generation (T2I), use the default input image if available
+                    if (originalUploadedBase64Image) {
+                         originalPanelContainer.style.display = 'block';
+                         originalImagePreview.src = originalUploadedBase64Image;
+                         originalImagePreview.classList.remove('hidden');
+                         originalImagePlaceholder.classList.add('hidden');
+                    }
+                }
+                
+                currentBase64Image = resultBase64; 
+
+                resultImagePreview.src = resultBase64;
+                resultImagePreview.classList.remove('hidden');
+                resultImagePlaceholder.classList.add('hidden');
+                
+                resultActions.classList.remove('hidden');
+
+                setLoadingState(false);
+                showMessage("Spell Cast Successfully! The enchantment is complete.", "success");
+                
+                const mode = originalUploadedBase64Image ? 'Magic Refined' : 'New Enchantment';
+                inputStatus.textContent = `Status: ${mode} | Ready for next spell.`;
+                
+                promptInput.value = '';
+
+            } catch (error) {
+                console.error("Spellcasting Error:", error);
+                setLoadingState(false);
+                showMessage(`Fatal Spellcasting Error: ${error.message}. Check browser console for API key or permission issues.`, "error");
+            }
+        }
+
+        function downloadImage() {
+            animateStardustBurst(downloadButton);
+            const resultImageSrc = resultImagePreview.src;
+            if (resultImageSrc && resultImagePreview.classList.contains('hidden') === false) {
+                const a = document.createElement('a');
+                a.href = resultImageSrc;
+                
+                let filename = 'everglow_enchantment.png';
+                
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            } else {
+                showMessage("No enchantment to download!", "error");
+            }
+        }
+        
+        // --- Initialization ---
+
+        function initApp() {
+            // Attach all event listeners
+            uploadButton.addEventListener('click', () => { imageInput.click(); });
+            imageInput.addEventListener('change', handleImageUpload);
+            modalDeclineButton.addEventListener('click', handleModalDecline);
+            modalConfirmButton.addEventListener('click', handleModalConfirm);
+            magicButton.addEventListener('click', handleMagicButtonClick);
+            downloadButton.addEventListener('click', downloadImage);
+            
+            // Initial UI Setup
+            resetAppState(); 
+        }
+
+        // Attach initialization function to the window load event to ensure all HTML is ready
+        window.addEventListener('load', () => {
+            initApp();
+        });
+    </script>
+</body>
+</html>
+
+
